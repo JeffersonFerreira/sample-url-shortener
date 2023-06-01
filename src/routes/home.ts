@@ -1,5 +1,6 @@
 ﻿import express from "express"
 import path from "path"
+import UrlModel from "../models/UrlModel";
 
 const router = express.Router();
 
@@ -17,12 +18,15 @@ router.get("/done", async function (req, res) {
 
 // Serve the user whatever link he had shortened
 router.get("/*", async function (req, res) {
-    // This link does not exist
-    if (req.url === "/non") {
+    const doc = await UrlModel
+        .findById(req.url.substring(1))
+        .lean()
+
+    if (doc) {
+        return res.redirect(doc.url!)
+    } else {
         return res.send("This page does not exist")
     }
-
-    res.send("serving some shit for you")
 })
 
 export default router;
