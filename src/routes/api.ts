@@ -1,6 +1,8 @@
 ﻿import express from "express"
-import UrlModel from "../models/UrlModel"
+import {body, validationResult, matchedData, checkSchema} from "express-validator"
 import {nanoid} from "nanoid"
+
+import UrlModel from "../models/UrlModel"
 
 const router = express.Router();
 
@@ -15,30 +17,50 @@ router.all("/", async (req, res, next) => {
 })
 
 /** Possible issues:
- * - What if user adds our own url?
- * - What if the input is not an url?
- * - What if the body has wrong format?
  * - Add support for custom expiration time
  * - What are the potential exploits I don't know yet?
  */
-router.post("/", async function (req, res) {
-    const url = req.body.url;
 
-    try {
-        const record = await UrlModel.create({
-            _id: nanoid(),
-            url
-        });
+router.post("/",
+    body("url")
+        .trim()
+        .notEmpty()
+        .isURL({
+            host_blacklist: [
+                process.env.PUBLIC_ADDRESS!,
+                "127.0.0.1",
+                "localhost",
+                "0.0.0.0",
+            ]
+        }),
+    async function (req, res) {
+        const validation = validationResult(req);
 
-        return res.json({
-            short: process.env.PUBLIC_ADDRESS + record._id,
-            original: url
-        })
-    } catch (err) {
-        console.error(err);
+        if (!validation.isEmpty()) {
+            return res
+                .status(400)
+                .json({
+                    errors: validation.array({onlyFirstError: true})
+                })
+        }
 
-        return res.sendStatus(400)
-    }
-})
+        const {url} = matchedData(req)
+
+        try {
+            const record = await UrlModel.create({
+                _id: nanoid(),
+                url
+            });
+
+            return res.json({
+                short: process.env.PUBLIC_ADDRESS + record._id,
+                original: url
+            })
+        } catch (err) {
+            console.error(err);
+
+            return res.sendStatus(400)
+        }
+    })
 
 export default router;

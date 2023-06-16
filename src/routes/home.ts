@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Homepage
 router.get("/", async function (req, res) {
-    const home = path.join(__dirname, "../public/index.html");
+    const home = path.join(__dirname, "../../public/index.html");
 
     res.sendFile(home)
 })
@@ -17,7 +17,7 @@ router.get("/done", async function (req, res) {
 })
 
 // Serve the user whatever link he had shortened
-router.get("/*", async function (req, res) {
+router.get("*", async function (req, res) {
     const doc = await UrlModel
         .findById(req.url.substring(1))
         .lean()
