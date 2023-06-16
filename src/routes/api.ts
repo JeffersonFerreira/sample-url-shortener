@@ -17,7 +17,6 @@ router.all("/", async (req, res, next) => {
 })
 
 /** Possible issues:
- * - Add support for custom expiration time
  * - What are the potential exploits I don't know yet?
  */
 
@@ -49,12 +48,14 @@ router.post("/",
         try {
             const record = await UrlModel.create({
                 _id: nanoid(),
-                url
+                url,
             });
+
+            console.log(`Url shorted from '${url}' to '${record._id}'`)
 
             return res.json({
                 short: process.env.PUBLIC_ADDRESS + record._id,
-                original: url
+                original: url,
             })
         } catch (err) {
             console.error(err);

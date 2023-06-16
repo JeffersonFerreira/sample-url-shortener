@@ -8,7 +8,14 @@ import path from "path"
 
 dotenv.config();
 
-mongoose.connect(process.env.DATABASE_URI!);
+console.log("Connecting to mongoDB at: ", process.env.DATABASE_URI)
+mongoose.connect(process.env.DATABASE_URI!)
+    .then(mo => {
+       console.log("Database connected")
+    })
+    .catch(err => {
+        console.error(err);
+    });
 
 const app = express();
 
@@ -17,4 +24,4 @@ app.use("/static", express.static(path.join(__dirname, "../public/assets/")))
 app.use("/api", api);
 app.use("/", home);
 
-app.listen(process.env.PORT);
+app.listen(process.env.PORT!);
