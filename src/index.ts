@@ -19,6 +19,10 @@ mongoose.connect(process.env.DATABASE_URI!)
 
 const app = express();
 
+app.get("/ping", (req, res) => {
+    return res.send("pong")
+})
+
 app.use(bodyParser.urlencoded({extended: false}));
 app.use("/static", express.static(path.join(__dirname, "../public/assets/")))
 app.use("/api", api);
